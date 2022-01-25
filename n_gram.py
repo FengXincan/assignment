@@ -65,7 +65,7 @@ ngram_counter, prefix_counter, unigram_counter = construct_ngram_corpus(train_se
 def calculate_sentence_entropy(sentences, n=3):
     entropy_list = []
     probability = 1
-    log_probability = 0
+    entropy = 0
     for i, item in enumerate(sentences):
         ngram = list(zip(*[item.split()[i:] for i in range(n)]))
         for piece in ngram:
@@ -76,9 +76,9 @@ def calculate_sentence_entropy(sentences, n=3):
             interpolation_weight = (d / unigram_counter[piece[1]]) * abs(prefix_counter[(piece[1], piece[2])])
             continue_probability = unigram_counter[piece[2]]
             probability = max((ngram_counter[piece] - d), 0) / prefix_counter[(piece[0], piece[1])] + interpolation_weight * continue_probability
-            log_probability += log(probability)
-            entropy = 
-            entropy_list.append(entropy)
+            entropy += -log(probability)
+            avg_entropy = entropy / len(item)
+            entropy_list.append(avg_entropy)
     return entropy_list
 
 test_sentences = read_sentences('wiki-en-test.word')
