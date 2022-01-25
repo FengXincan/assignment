@@ -25,6 +25,8 @@ def read_sentences(path):
 train_sentences = read_sentences('wiki-en-train.word')
 
 # make word dictionary
+# but finally, It seems that I didn't use this, 
+# instead, I used the "counters" directly.
 def make_word_dic(sentences):
     word_dic = {}
     for item in sentences:
@@ -54,15 +56,15 @@ def construct_ngram_corpus(sentences, n=3):
         prefix_list += prefix
         unigram_list += unigram
 
-    ngram_counter = Counter(ngram_list)
-    prefix_counter = Counter(prefix_list)
-    unigram_counter = Counter(unigram_list)
+    ngram_counter = Counter(ngram_list + [('UNK', 'UNK', 'UNK')])
+    prefix_counter = Counter(prefix_list + [('UNK', 'UNK')])
+    unigram_counter = Counter(unigram_list + [('UNK')])
     return ngram_counter, prefix_counter, unigram_counter
 
 ngram_counter, prefix_counter, unigram_counter = construct_ngram_corpus(train_sentences)
 
 # calculate the probability of the sentence
-def calculate_sentence_entropy(sentences, n=3):
+def calculate_sentence_entropy(sentences, word_dic, n=3):
     entropy_list = []
     probability = 1
     entropy = 0
@@ -72,14 +74,21 @@ def calculate_sentence_entropy(sentences, n=3):
             # add-1 smoothing
             # probability = ((ngram_counter[piece]+1) / (prefix_counter[(piece[0], piece[1])] + len(prefix_counter[(piece[0], piece[1])])))
             # Kneser-Ney Smoothing
-            d = 0.75
-            interpolation_weight = (d / unigram_counter[piece[1]]) * abs(prefix_counter[(piece[1], piece[2])])
-            continue_probability = unigram_counter[piece[2]]
-            probability = max((ngram_counter[piece] - d), 0) / prefix_counter[(piece[0], piece[1])] + interpolation_weight * continue_probability
-            entropy += -log(probability)
-            avg_entropy = entropy / len(item)
-            entropy_list.append(avg_entropy)
+            # for i in range(2):
+            #     if piece[i] not in word_dic:
+            #         lst = list(piece)
+            #         lst[0] = 'UNK'
+            #         lst[1] = 'UNK'
+            #         lst[2] = 'UNK'
+            #         piece = tuple(lst)
+            #     else: continue
+                d = 0.75
+                interpolation_weight = (d / (unigram_counter[piece[1]]+1)) * abs(prefix_counter[(piece[1], piece[2])] + len(ngram))
+                continue_probability = unigram_counter[piece[2]]
+                probability = max((ngram_counter[piece] - d), 0.1) / (prefix_counter[(piece[0], piece[1])] + len(ngram)) + interpolation_weight * continue_probability
+                entropy += -log(probability) * probability
+                entropy_list.append(entropy)
     return entropy_list
 
 test_sentences = read_sentences('wiki-en-test.word')
-print(calculate_sentence_entropy(test_sentences))
+print(calculate_sentence_entropy(test_sentences, word_dic))
