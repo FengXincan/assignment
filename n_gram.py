@@ -1,10 +1,17 @@
 '''
-summary:
-
+report:
+I referred to this cite:
+    https://www.jeddd.com/article/python-ngram-language-prediction.html
+    that is am implement of n-gram on chinese news next word prediction.
+we are different in:
+    the data preprocessing,
+    smoothing method,
+    and also the entropy calculation.
 '''
 
 
 from collections import Counter
+from math import log
 
 # read train/test data into sentences
 def read_sentences(path):
@@ -12,7 +19,7 @@ def read_sentences(path):
         lines = f.readlines()
         sentences = []
         for item in range(len(lines)):
-            sentences.append('<BOS> ' + lines[item].rstrip('.,\n') + '<EOS>')
+            sentences.append('<s> ' + lines[item].rstrip('.,\n') + '</s>')
     return sentences
 
 train_sentences = read_sentences('wiki-en-train.word')
@@ -38,27 +45,41 @@ count the number of all n-gram lists and all (n-1)-gram lists,
 def construct_ngram_corpus(sentences, n=3):
     ngram_list = [] # n grams
     prefix_list = [] # n-1 grams
+    unigram_list = [] # n-2 grams
     for i, item in enumerate(sentences):
         ngram = list(zip(*[item.split()[i:] for i in range(n)]))
         prefix = list(zip(*[item.split()[i:] for i in range(n-1)]))
+        unigram = list(zip(*[item.split()[i:] for i in range(n-2)]))
         ngram_list += ngram
         prefix_list += prefix
+        unigram_list += unigram
 
     ngram_counter = Counter(ngram_list)
     prefix_counter = Counter(prefix_list)
-    return ngram_counter, prefix_counter
+    unigram_counter = Counter(unigram_list)
+    return ngram_counter, prefix_counter, unigram_counter
 
-ngram_counter, prefix_counter = construct_ngram_corpus(train_sentences)
+ngram_counter, prefix_counter, unigram_counter = construct_ngram_corpus(train_sentences)
 
 # calculate the probability of the sentence
-def calculate_sentence_probability(sentences, n=3):
-    probability_list = []
+def calculate_sentence_entropy(sentences, n=3):
+    entropy_list = []
     probability = 1
+    log_probability = 0
     for i, item in enumerate(sentences):
         ngram = list(zip(*[item.split()[i:] for i in range(n)]))
-        probability *= (ngram_counter[ngram] / (prefix_counter[(ngram[0], ngram[1])] + 1))
-        probability_list.append(probability)
-    return probability_list
+        for piece in ngram:
+            # add-1 smoothing
+            # probability = ((ngram_counter[piece]+1) / (prefix_counter[(piece[0], piece[1])] + len(prefix_counter[(piece[0], piece[1])])))
+            # Kneser-Ney Smoothing
+            d = 0.75
+            interpolation_weight = (d / unigram_counter[piece[1]]) * abs(prefix_counter[(piece[1], piece[2])])
+            continue_probability = unigram_counter[piece[2]]
+            probability = max((ngram_counter[piece] - d), 0) / prefix_counter[(piece[0], piece[1])] + interpolation_weight * continue_probability
+            log_probability += log(probability)
+            entropy = 
+            entropy_list.append(entropy)
+    return entropy_list
 
 test_sentences = read_sentences('wiki-en-test.word')
-print(calculate_sentence_probability(test_sentences))
+print(calculate_sentence_entropy(test_sentences))
