@@ -56,11 +56,9 @@ def calculate_sentence_probability(sentences, n=3):
     probability = 1
     for i, item in enumerate(sentences):
         ngram = list(zip(*[item.split()[i:] for i in range(n)]))
-        for item in ngram:
-            probability *= ngram_counter[item] / (prefix_counter[(item[0], item[1])] + 1)
-            probability_list.append(probability)
+        probability *= (ngram_counter[ngram] / (prefix_counter[(ngram[0], ngram[1])] + 1))
+        probability_list.append(probability)
     return probability_list
 
 test_sentences = read_sentences('wiki-en-test.word')
 print(calculate_sentence_probability(test_sentences))
-
