@@ -3,7 +3,7 @@ report:
 reference:
     https://medium.com/@uttam94/perception-implementation-from-scratch-using-python-90768afa505b
 our difference:
-    data is not the same
+    data is not the same.
 '''
 
 # read train/test data into sentences
@@ -14,13 +14,15 @@ import numpy as np
 def read_data(path):
     with open(path, encoding='utf-8') as f:
         lines = f.readlines()
-        sentences = []
+        label_sentences = []
         for item in range(len(lines)):
-            sentences.append(lines[item].rstrip('\n').split('\t'))
-    return data
+            label_sentences.append(lines[item].rstrip('\n').split('\t'))
+    return label_sentences
 
-y_train, x_train = read_data('titles-en-train.labeled')
-x_test = read_data('titles-en-test.word')
+train_data = read_data('titles-en-train.labeled')
+y_train, x_train = train_data[0], train_data[1]
+test_data = read_data('titles-en-test.labeled')
+y_test, x_test = test_data[0], test_data[1]
 
 class perceptron:
     def __init__(self, learning_rate=0.01, n_iters=1000):

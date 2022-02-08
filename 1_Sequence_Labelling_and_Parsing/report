@@ -1,0 +1,19 @@
+[Part-of-speech tagging]: 
+I used an HMM model as the predictor to do the feature recognition and classification. 
+Please see 'hmm.py'
+
+1. explanation about my program:
+• training part
+- read training data
+- clean data, set the unknown token as 'UNK'
+- do train
+
+• testing part
+- read test data
+- clean data, replace the unkown token with 'UNK'
+- do test
+
+2. test accuracy:
+
+[Dependency Parsing]:
+
