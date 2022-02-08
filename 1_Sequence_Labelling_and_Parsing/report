@@ -1,4 +1,4 @@
-[Part-of-speech tagging]: 
+[Part-of-speech tagging]
 I used an HMM model as the predictor to do the feature recognition and classification. 
 Please see 'hmm.py'
 
@@ -15,5 +15,12 @@ Please see 'hmm.py'
 
 2. test accuracy:
 
-[Dependency Parsing]:
+3. reference: 
+https://github.com/larsmans/seqlearn/blob/master/examples/conll.py
+
+
+
+
+[Dependency Parsing]
+Please see '.py'
 
